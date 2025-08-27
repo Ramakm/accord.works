@@ -1,0 +1,33 @@
+# Dependencies and build
+node_modules/
+.next/
+.dist/
+dist/
+build/
+coverage/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+.env
+backend/.env
+frontend/.env
+
+# OS / IDE
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Uploads and runtime artifacts
+uploads/
+*.log
+
+# Local test artifacts
+/test_contract.txt
+*.tmp

@@ -218,26 +218,35 @@ export default function Home() {
       <section id="hero" className="">
         <div className="grid items-center gap-8 md:grid-cols-2">
           <div>
-            <motion.h1 initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="text-4xl font-extrabold tracking-tight md:text-5xl">
+            <motion.h1 initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="text-5xl font-extrabold tracking-tight md:text-6xl">
               AI Contract Assistant
             </motion.h1>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1, duration: 0.3 }} className="mt-3 text-lg text-slate-600">
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1, duration: 0.3 }} className="mt-4 text-xl text-slate-600 dark:text-slate-300">
               Summarize, review risks, and draft emails from your contracts in seconds.
             </motion.p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <a href="#upload" className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-700">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <a href="/upload" className="inline-flex items-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-700">
                 <UploadCloud className="mr-2 h-4 w-4" /> Upload a Contract
               </a>
-              <a href="#features" className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+              <a href="#features" className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                 <Sparkles className="mr-2 h-4 w-4" /> See Demo
               </a>
             </div>
           </div>
           <div>
-            <div className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="aspect-[4/3] w-full rounded-lg bg-gradient-to-br from-slate-100 to-slate-200" />
-              <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5" />
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-md dark:border-slate-700 dark:bg-slate-900"
+            >
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                className="aspect-[4/3] w-full rounded-xl bg-gradient-to-br from-indigo-50 to-slate-200 dark:from-slate-800 dark:to-slate-700"
+              />
+              <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5" />
+            </motion.div>
           </div>
         </div>
       </section>
@@ -253,7 +262,7 @@ export default function Home() {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
           variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } }}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
         >
           {[
             { icon: FileText, title: 'Summarize Contracts', desc: 'Get an instant TL;DR with key points and obligations.' },
@@ -264,7 +273,7 @@ export default function Home() {
             <motion.div
               key={i}
               variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
             >
               <div className="flex items-center gap-3">
                 <f.icon className="h-5 w-5 text-indigo-600" />
@@ -302,7 +311,7 @@ export default function Home() {
             title: '3. Export or send email drafts',
             desc: 'Copy results to clipboard or send a Gmail draft in one click.'
           }].map((s, i) => (
-            <motion.div key={i} variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <motion.div key={i} variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="relative rounded-2xl border border-slate-200 bg-white p-7 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <div className="mb-3 flex items-center gap-3">
                 <s.icon className="h-5 w-5 text-indigo-600" />
                 <div className="font-semibold">{s.title}</div>
@@ -320,13 +329,13 @@ export default function Home() {
           <h2 className="text-2xl font-bold tracking-tight">Loved by teams and founders</h2>
           <p className="mt-2 text-slate-600">Real stories from early users.</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-3">
           {[
             { quote: 'Cut our contract review time by 70%. Game changer for our sales ops.', name: 'Ava M.', role: 'Head of Ops' },
             { quote: 'Risk flags are on point and the email drafts save so much back-and-forth.', name: 'Daniel K.', role: 'Founder' },
             { quote: 'A clean UI that gets out of the way. We finally ship contracts faster.', name: 'Priya S.', role: 'COO' },
           ].map((t, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <p className="text-slate-800 dark:text-slate-100">“{t.quote}”</p>
               <div className="mt-3 text-sm text-slate-600 dark:text-slate-300">— {t.name}, {t.role}</div>
             </motion.div>
@@ -342,50 +351,6 @@ export default function Home() {
         </div>
         <PricingCards />
       </section>
-
-      {/* Upload Section (shown first). After parsing, user uses Tabs below */}
-      {!analysis && (
-        <Card id="upload">
-          <CardHeader className="pb-2">
-            <CardTitle>Upload Contract</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <FileDropzone onFiles={(files) => {
-                const f = files?.[0]
-                if (f) setFile(f)
-              }} />
-              <div className="grid gap-2">
-                <Label htmlFor="file-input">Or select a file</Label>
-                <Input id="file-input" type="file" accept=".pdf,.docx,.txt" onChange={handleFileChange} />
-              </div>
-              {file && (
-                <div className="flex items-center gap-2 rounded-lg bg-slate-50 p-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  <div className="text-sm text-slate-700">
-                    <span className="font-medium">Selected:</span> {file.name}
-                  </div>
-                </div>
-              )}
-              <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
-                {uploading ? (
-                  <span className="inline-flex items-center gap-2"><Spinner size={18} /> Analyzing contract…</span>
-                ) : (
-                  'Upload & Analyze Contract'
-                )}
-              </Button>
-              {error && (
-                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {error}
-                  <div className="mt-2">
-                    <Button size="sm" variant="outline" onClick={handleUpload}>Retry</Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Tabs visible after analysis */}
       {analysis && (

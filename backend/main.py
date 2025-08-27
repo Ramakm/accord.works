@@ -9,7 +9,6 @@ import uuid
 from typing import Optional, List, Dict, Any
 import PyPDF2
 from docx import Document
-import openai
 from dotenv import load_dotenv
 import json
 import re
@@ -23,8 +22,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Initialize OpenAI
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Gemini env presence will be checked lazily in contract_ai
 
 # Pydantic models
 class ContractAnalysis(BaseModel):
@@ -50,7 +48,7 @@ class EmailRequest(BaseModel):
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js dev server
+    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:3000")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,7 +70,7 @@ async def health_check():
         "status": "healthy",
         "service": "Contract AI Backend",
         "version": "1.0.0",
-        "openai_configured": bool(os.getenv("OPENAI_API_KEY"))
+        "gemini_configured": bool(os.getenv("GEMINI_API_KEY"))
     }
 
 def extract_text_from_pdf(file_path: Path) -> str:
@@ -81,7 +79,8 @@ def extract_text_from_pdf(file_path: Path) -> str:
     with open(file_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
         for page in pdf_reader.pages:
-            text += page.extract_text() + "\n"
+            page_text = page.extract_text() or ""
+            text += page_text + "\n"
     return text
 
 def extract_text_from_docx(file_path: Path) -> str:
@@ -137,24 +136,16 @@ async def upload_file(file: UploadFile = File(...)):
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Error extracting text: {str(e)}")
         
-        # Analyze contract with AI
-        if not os.getenv("OPENAI_API_KEY"):
+        # Analyze contract with AI (Gemini)
+        try:
+            analysis = analyze_contract_with_ai(extracted_text)
+        except Exception as e:
             analysis = {
-                "summary": "OpenAI API key not configured. Please add your API key to analyze contracts.",
+                "summary": f"AI analysis failed: {str(e)}",
                 "key_clauses": [],
                 "risks": [],
-                "risk_score": 0
+                "risk_score": 50
             }
-        else:
-            try:
-                analysis = analyze_contract_with_ai(extracted_text)
-            except Exception as e:
-                analysis = {
-                    "summary": f"AI analysis failed: {str(e)}",
-                    "key_clauses": [],
-                    "risks": [],
-                    "risk_score": 50
-                }
         
         return JSONResponse(
             status_code=200,
@@ -225,9 +216,6 @@ async def analyze_contract(request: dict):
         if not contract_text:
             raise HTTPException(status_code=400, detail="No contract text provided")
         
-        if not os.getenv("OPENAI_API_KEY"):
-            raise HTTPException(status_code=400, detail="OpenAI API key not configured")
-        
         analysis = analyze_contract_with_ai(contract_text)
         return analysis
     
@@ -242,9 +230,6 @@ async def generate_email(request: EmailRequest):
     Generate negotiation email based on contract
     """
     try:
-        if not os.getenv("OPENAI_API_KEY"):
-            raise HTTPException(status_code=400, detail="OpenAI API key not configured")
-        
         email = generate_negotiation_email(
             contract_text=request.contract_text,
             tone=request.tone,
@@ -261,9 +246,6 @@ async def ask_question(request: QuestionRequest):
     Answer questions about the contract
     """
     try:
-        if not os.getenv("OPENAI_API_KEY"):
-            raise HTTPException(status_code=400, detail="OpenAI API key not configured")
-        
         answer = answer_contract_question(
             question=request.question,
             contract_text=request.contract_text

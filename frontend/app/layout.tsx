@@ -22,15 +22,15 @@ export default function RootLayout({
         <Providers>
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
           <nav className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3">
-            <a href="#hero" className="flex items-center gap-2">
+            <a href="/" className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-md bg-indigo-600 shadow-sm" />
               <span className="text-lg font-semibold tracking-tight">Contract AI</span>
             </a>
             <div className="hidden items-center gap-2 sm:flex">
-              <a href="#features" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">Features</a>
-              <a href="#pricing" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">Pricing</a>
-              <a href="#contact" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">Contact</a>
-              <a href="#upload" className="ml-1 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-700">Try Now</a>
+              <a href="/#features" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">Features</a>
+              <a href="/#pricing" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">Pricing</a>
+              <a href="/#contact" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">Contact</a>
+              <a href="/upload" className="ml-1 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-700">Try Now</a>
               <ThemeToggle />
             </div>
           </nav>
@@ -52,9 +52,9 @@ export default function RootLayout({
                 <div>
                   <div className="text-sm font-semibold text-white">Product</div>
                   <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                    <li><a className="hover:text-white" href="#features">Features</a></li>
-                    <li><a className="hover:text-white" href="#pricing">Pricing</a></li>
-                    <li><a className="hover:text-white" href="#upload">Try Now</a></li>
+                    <li><a className="hover:text-white" href="/#features">Features</a></li>
+                    <li><a className="hover:text-white" href="/#pricing">Pricing</a></li>
+                    <li><a className="hover:text-white" href="/upload">Try Now</a></li>
                   </ul>
                 </div>
                 <div>
