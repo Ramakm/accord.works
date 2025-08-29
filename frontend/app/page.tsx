@@ -14,7 +14,7 @@ export default function Home() {
               Understand Contracts in Seconds, Not Hours.
             </motion.h1>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08, duration: 0.35 }} className="mt-4 text-lg text-brand-text-secondary">
-              ClauseWise uses AI to summarize, extract clauses, highlight risks, and even draft responses – saving you time and money.
+              ContractAI uses AI to summarize, extract clauses, highlight risks, and even draft responses – saving you time and money.
             </motion.p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a href="/upload" className="btn-primary">
@@ -180,7 +180,7 @@ export default function Home() {
         </div>
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           {[
-            { quote: 'ClauseWise saved me hours of legal work. Game changer!', name: 'Startup Founder' },
+            { quote: 'ContractAI saved me hours of legal work. Game changer!', name: 'Startup Founder' },
             { quote: 'Great for quick reviews before client calls.', name: 'Lawyer' },
             { quote: 'Clean summaries and clear risk flags. Super helpful.', name: 'Operations Lead' },
           ].map((t, i) => (

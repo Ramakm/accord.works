@@ -5,7 +5,7 @@ export default function TermsPage() {
       <p>Effective date: 2025-08-29</p>
       <h2>Overview</h2>
       <p>
-        By accessing or using ClauseWise, you agree to these Terms. If you do not agree,
+        By accessing or using ContractAI, you agree to these Terms. If you do not agree,
         do not use the service.
       </p>
       <h2>Use of the Service</h2>
@@ -22,7 +22,7 @@ export default function TermsPage() {
         attorney for legal decisions.
       </p>
       <h2>Limitation of Liability</h2>
-      <p>To the maximum extent permitted by law, ClauseWise is not liable for indirect or consequential damages.</p>
+      <p>To the maximum extent permitted by law, ContractAI is not liable for indirect or consequential damages.</p>
       <h2>Contact</h2>
       <p>Questions? Email <a href="mailto:legal@clausewise.ai">legal@clausewise.ai</a>.</p>
     </div>

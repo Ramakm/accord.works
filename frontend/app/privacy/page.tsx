@@ -5,7 +5,7 @@ export default function PrivacyPage() {
       <p className="mt-1 text-sm text-brand-text-secondary">Effective date: 2025-08-29</p>
       <div className="mt-6 space-y-6 max-w-3xl">
         <p>
-          ClauseWise respects your privacy. We only process documents you upload to provide
+          ContractAI respects your privacy. We only process documents you upload to provide
           AI-powered analysis. We do not sell your data. We use industry-standard
           encryption in transit (TLS/SSL) and at rest (cloud provider defaults).
         </p>
