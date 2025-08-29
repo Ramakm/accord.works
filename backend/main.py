@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import uuid
 from typing import Optional, List, Dict, Any
+from urllib.parse import urlencode
 import PyPDF2
 from docx import Document
 from dotenv import load_dotenv
@@ -16,7 +17,11 @@ from backend.contract_ai import analyze_contract_with_ai, generate_negotiation_e
 import hmac
 import hashlib
 
+# Load env from repo root .env (when running from project root)
 load_dotenv()
+# Also load env from backend/.env explicitly to ensure backend-specific vars are available
+_BACKEND_ENV_PATH = (Path(__file__).resolve().parent / ".env").as_posix()
+load_dotenv(dotenv_path=_BACKEND_ENV_PATH, override=True)
 
 app = FastAPI(
     title="Contract AI Backend",
@@ -110,11 +115,18 @@ async def root():
 async def health_check():
     """Detailed health check"""
     return {
-        "status": "healthy",
-        "service": "Contract AI Backend",
+        "status": "ok",
+        "service": "contract-ai-backend",
         "version": "1.0.0",
         "gemini_configured": bool(os.getenv("GEMINI_API_KEY"))
     }
+
+def build_static_checkout_link(product_id: str, params: Dict[str, Any]) -> str:
+    """Construct a Dodo static payment link for a product with optional params."""
+    base = os.getenv("DODO_CHECKOUT_BASE", "https://checkout.dodopayments.com/buy").rstrip("/")
+    pid = product_id.strip()
+    query = urlencode({k: v for (k, v) in params.items() if v not in (None, "")})
+    return f"{base}/{pid}" + (f"?{query}" if query else "")
 
 def extract_text_from_pdf(file_path: Path) -> str:
     """Extract text from PDF file"""
@@ -298,16 +310,21 @@ async def ask_question(request: QuestionRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Question answering failed: {str(e)}")
 
-def _verify_dodo_signature(secret: str, body: bytes, signature: str) -> bool:
-    """Verify Dodo webhook signature using HMAC-SHA256.
-
-    Note: Header name and signing scheme should match Dodo docs.
-    This implementation expects a hex digest in header 'x-dodo-signature'.
+def _verify_dodo_signature(secret: str, body: bytes, webhook_headers: Dict[str, str]) -> bool:
+    """Verify Dodo webhook signature using Standard Webhooks format.
+    
+    Dodo uses Standard Webhooks with headers:
+    - webhook-id
+    - webhook-signature  
+    - webhook-timestamp
     """
     try:
-        computed = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
-        return hmac.compare_digest(computed, signature)
-    except Exception:
+        from standardwebhooks import Webhook
+        webhook = Webhook(secret)
+        webhook.verify(body, webhook_headers)
+        return True
+    except Exception as e:
+        print(f"[Dodo] Webhook signature verification failed: {e}")
         return False
 
 @app.post("/webhooks/dodo")
@@ -324,11 +341,18 @@ async def dodo_webhook(request: Request):
 
     # Read raw body for signature verification
     raw = await request.body()
-    signature = request.headers.get("x-dodo-signature")
-    if not signature:
-        raise HTTPException(status_code=400, detail="Missing signature header")
+    
+    # Standard Webhooks headers
+    webhook_headers = {
+        "webhook-id": request.headers.get("webhook-id") or "",
+        "webhook-signature": request.headers.get("webhook-signature") or "",
+        "webhook-timestamp": request.headers.get("webhook-timestamp") or "",
+    }
+    
+    if not webhook_headers["webhook-signature"]:
+        raise HTTPException(status_code=400, detail="Missing webhook-signature header")
 
-    if not _verify_dodo_signature(secret, raw, signature):
+    if not _verify_dodo_signature(secret, raw, webhook_headers):
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     # Signature valid; parse JSON and perform routing
@@ -402,6 +426,51 @@ async def get_credits(email: str):
     """Get current credits for an email (temporary store)."""
     credits = load_credits()
     return {"email": email.lower(), "credits": int(credits.get(email.lower(), 0))}
+
+@app.get("/payments/pro/link")
+async def get_pro_payment_link(
+    email: Optional[str] = None,
+    firstName: Optional[str] = None,
+    lastName: Optional[str] = None,
+    quantity: int = 1,
+    redirect_url: Optional[str] = None,
+    disableEmail: Optional[bool] = None,
+    disableFirstName: Optional[bool] = None,
+    disableLastName: Optional[bool] = None,
+    showDiscounts: Optional[bool] = None,
+):
+    """
+    Returns a static checkout URL for the Pro product.
+
+    Uses env:
+    - DODO_PRO_PRODUCT_ID
+    - DODO_CHECKOUT_BASE (default https://checkout.dodopayments.com/buy)
+    - DODO_RETURN_URL (fallback for redirect_url if not provided)
+    """
+    product_id = os.getenv("DODO_PRO_PRODUCT_ID")
+    if not product_id:
+        raise HTTPException(status_code=500, detail="DODO_PRO_PRODUCT_ID not configured")
+
+    if not redirect_url:
+        redirect_url = os.getenv("DODO_RETURN_URL")
+    
+    if not redirect_url:
+        raise HTTPException(status_code=500, detail="redirect_url is required but not provided")
+
+    params: Dict[str, Any] = {
+        "quantity": quantity,
+        "redirect_url": redirect_url,
+        "email": email,
+        "firstName": firstName,
+        "lastName": lastName,
+        "disableEmail": str(disableEmail).lower() if isinstance(disableEmail, bool) else None,
+        "disableFirstName": str(disableFirstName).lower() if isinstance(disableFirstName, bool) else None,
+        "disableLastName": str(disableLastName).lower() if isinstance(disableLastName, bool) else None,
+        "showDiscounts": str(showDiscounts).lower() if isinstance(showDiscounts, bool) else None,
+    }
+
+    link = build_static_checkout_link(product_id, params)
+    return {"paymentLink": link}
 
 if __name__ == "__main__":
     import uvicorn

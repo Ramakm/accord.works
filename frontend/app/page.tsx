@@ -197,16 +197,31 @@ export default function Home() {
               </ul>
               <button
                 className="mt-6 btn-primary w-full justify-center transition-transform transform-gpu hover:scale-[1.02] active:scale-95"
-                onClick={() => {
-                  const map: Record<string, string | undefined> = {
-                    Free: process.env.NEXT_PUBLIC_DODO_CHECKOUT_FREE,
-                    Pro: process.env.NEXT_PUBLIC_DODO_CHECKOUT_PRO,
-                  }
-                  const url = map[p.name]
-                  if (url) {
-                    window.location.href = url
-                  } else {
-                    alert('Checkout link not configured. Please set NEXT_PUBLIC_DODO_CHECKOUT_FREE/PRO in your env.')
+                onClick={async () => {
+                  try {
+                    if (p.name === 'Pro') {
+                      const base = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+                      const params = new URLSearchParams()
+                      // Optionally pass known user fields if you have them
+                      // params.set('email', user?.email ?? '')
+                      const res = await fetch(`${base}/payments/pro/link?${params.toString()}`)
+                      if (!res.ok) throw new Error('Failed to get payment link')
+                      const data = await res.json()
+                      const link = data?.paymentLink as string | undefined
+                      if (!link) throw new Error('No link returned')
+                      window.location.href = link
+                      return
+                    }
+                    // Free uses static env link
+                    const url = process.env.NEXT_PUBLIC_DODO_CHECKOUT_FREE
+                    if (url) {
+                      window.location.href = url
+                    } else {
+                      alert('Checkout link not configured. Please set NEXT_PUBLIC_DODO_CHECKOUT_FREE and NEXT_PUBLIC_BACKEND_URL in your env.')
+                    }
+                  } catch (e) {
+                    console.error(e)
+                    alert('Unable to start checkout. Please try again later.')
                   }
                 }}
               >
