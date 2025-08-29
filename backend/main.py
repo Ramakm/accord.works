@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 import json
 import re
 from backend.contract_ai import analyze_contract_with_ai, generate_negotiation_email, answer_contract_question
+import hmac
+import hashlib
 
 load_dotenv()
 
@@ -54,9 +56,50 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create uploads directory if it doesn't exist
+# Create storage directories
 UPLOAD_DIR = Path("uploads")
+DATA_DIR = Path("data")
 UPLOAD_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(exist_ok=True)
+
+# Simple persistent stores
+_CREDITS_FILE = DATA_DIR / "credits.json"
+_EVENTS_FILE = DATA_DIR / "processed_events.json"
+
+def _load_json(path: Path, default):
+    try:
+        if not path.exists():
+            return default
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+def _save_json(path: Path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def load_credits() -> Dict[str, int]:
+    return _load_json(_CREDITS_FILE, {})
+
+def save_credits(data: Dict[str, int]):
+    _save_json(_CREDITS_FILE, data)
+
+def load_processed_events() -> Dict[str, bool]:
+    return _load_json(_EVENTS_FILE, {})
+
+def save_processed_events(data: Dict[str, bool]):
+    _save_json(_EVENTS_FILE, data)
+
+def add_credits(email: str, amount: int):
+    credits = load_credits()
+    credits[email.lower()] = int(credits.get(email.lower(), 0)) + int(amount)
+    save_credits(credits)
+
+def set_credits(email: str, amount: int):
+    credits = load_credits()
+    credits[email.lower()] = int(amount)
+    save_credits(credits)
 
 @app.get("/")
 async def root():
@@ -254,6 +297,111 @@ async def ask_question(request: QuestionRequest):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Question answering failed: {str(e)}")
+
+def _verify_dodo_signature(secret: str, body: bytes, signature: str) -> bool:
+    """Verify Dodo webhook signature using HMAC-SHA256.
+
+    Note: Header name and signing scheme should match Dodo docs.
+    This implementation expects a hex digest in header 'x-dodo-signature'.
+    """
+    try:
+        computed = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(computed, signature)
+    except Exception:
+        return False
+
+@app.post("/webhooks/dodo")
+async def dodo_webhook(request: Request):
+    """Handle Dodo Payments webhooks.
+
+    Env required:
+    - DODO_WEBHOOK_SECRET: webhook signing secret from Dodo dashboard
+    """
+    secret = os.getenv("DODO_WEBHOOK_SECRET")
+    if not secret:
+        # Misconfiguration; do not process
+        raise HTTPException(status_code=500, detail="DODO_WEBHOOK_SECRET not configured")
+
+    # Read raw body for signature verification
+    raw = await request.body()
+    signature = request.headers.get("x-dodo-signature")
+    if not signature:
+        raise HTTPException(status_code=400, detail="Missing signature header")
+
+    if not _verify_dodo_signature(secret, raw, signature):
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    # Signature valid; parse JSON and perform routing
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    event_id = payload.get("id") or payload.get("event_id") or ""
+    event_type = payload.get("type") or payload.get("event") or ""
+    data = payload.get("data") or {}
+
+    # Idempotency: skip if already processed
+    processed = load_processed_events()
+    if event_id and processed.get(event_id):
+        return {"ok": True, "duplicate": True}
+
+    # Extract identifiers—adjust based on Dodo payload schema
+    customer = data.get("customer") or {}
+    email = (customer.get("email") or data.get("email") or "").strip()
+    # Try various fields to determine plan/name
+    plan_name = (
+        data.get("plan")
+        or (data.get("product") or {}).get("name")
+        or (data.get("price") or {}).get("name")
+        or (data.get("line_item") or {}).get("name")
+        or ""
+    )
+
+    # Map plan to credits
+    def credits_for_plan(name: str) -> int:
+        n = (name or "").lower()
+        if "pro" in n:
+            return 10
+        if "free" in n:
+            return 1
+        # Fallback by amount if present
+        amount = data.get("amount") or (data.get("price") or {}).get("amount")
+        if str(amount) in {"1500", "15", "15.00"}:
+            return 10
+        return 0
+
+    granted = 0
+    try:
+        if event_type in {"payment.completed", "checkout.completed"}:
+            if not email:
+                print("[Dodo] Missing customer email in payload; cannot grant credits")
+            else:
+                granted = credits_for_plan(plan_name)
+                if granted > 0:
+                    add_credits(email, granted)
+        elif event_type in {"subscription.activated", "subscription.renewed"}:
+            # Example: set base monthly credits for subscription
+            if email:
+                base = credits_for_plan(plan_name)
+                if base > 0:
+                    add_credits(email, base)
+        elif event_type in {"subscription.canceled"}:
+            # No credit change on cancel in this simple example
+            pass
+    finally:
+        if event_id:
+            processed[event_id] = True
+            save_processed_events(processed)
+
+    print("[Dodo] Webhook received:", event_type, "plan=", plan_name, "email=", email, "granted=", granted)
+    return {"ok": True, "granted": granted}
+
+@app.get("/credits/{email}")
+async def get_credits(email: str):
+    """Get current credits for an email (temporary store)."""
+    credits = load_credits()
+    return {"email": email.lower(), "credits": int(credits.get(email.lower(), 0))}
 
 if __name__ == "__main__":
     import uvicorn

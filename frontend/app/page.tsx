@@ -172,12 +172,10 @@ export default function Home() {
           <div className="eyebrow">Simple, Transparent Pricing</div>
           <h2 className="mt-2 h2">Choose a plan</h2>
         </div>
-        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
           {[
             { name: 'Free', credits: '1 credit', price: '$0' },
-            { name: 'Starter', credits: '5 credits', price: '$9' },
             { name: 'Pro', credits: '10 credits', price: '$15' },
-            { name: 'Team', credits: '20 credits', price: '$25' },
           ].map((p, i) => (
             <motion.div
               key={p.name}
@@ -202,15 +200,13 @@ export default function Home() {
                 onClick={() => {
                   const map: Record<string, string | undefined> = {
                     Free: process.env.NEXT_PUBLIC_DODO_CHECKOUT_FREE,
-                    Starter: process.env.NEXT_PUBLIC_DODO_CHECKOUT_STARTER,
                     Pro: process.env.NEXT_PUBLIC_DODO_CHECKOUT_PRO,
-                    Team: process.env.NEXT_PUBLIC_DODO_CHECKOUT_TEAM,
                   }
                   const url = map[p.name]
                   if (url) {
                     window.location.href = url
                   } else {
-                    alert('Checkout link not configured. Please set NEXT_PUBLIC_DODO_CHECKOUT_* in your env.')
+                    alert('Checkout link not configured. Please set NEXT_PUBLIC_DODO_CHECKOUT_FREE/PRO in your env.')
                   }
                 }}
               >
