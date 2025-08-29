@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Spinner } from '@/components/ui/spinner'
 import { FileDropzone } from '@/components/dropzone'
-import { CheckCircle2, Copy, AlertTriangle, Send } from 'lucide-react'
+import { CheckCircle2, Copy, AlertTriangle, Send, Sparkles, Download, RefreshCw, FileText } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useToast } from '@/components/ui/toast-provider'
 
 interface ContractAnalysis {
@@ -42,6 +43,36 @@ export default function UploadPage() {
   const [loadingEmail, setLoadingEmail] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { addToast } = useToast()
+
+  const handleReset = () => {
+    setAnalysis(null)
+    setExtractedText('')
+    setQaHistory([])
+    setGeneratedEmail(null)
+    setQuestion('')
+    setAnswer('')
+    setActiveTab('summary')
+  }
+
+  const buildMarkdown = (): string => {
+    if (!analysis) return ''
+    const clauses = analysis.key_clauses.map(c => `- [${c.importance.toUpperCase()}] ${c.type}: ${c.content}`).join('\n')
+    const risks = analysis.risks.map(r => `- (${r.severity.toUpperCase()}) ${r.risk_type}: ${r.description}${r.clause_reference ? ` [Clause: ${r.clause_reference}]` : ''}`).join('\n')
+    return `# ClauseWise Analysis\n\n## TL;DR Summary\n${analysis.summary}\n\n## Key Clauses\n${clauses}\n\n## Risks (Score: ${analysis.risk_score})\n${risks}\n\n---\nGenerated with ClauseWise.`
+  }
+
+  const handleExportMarkdown = () => {
+    if (!analysis) return
+    const md = buildMarkdown()
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'clausewise-analysis.md'
+    a.click()
+    URL.revokeObjectURL(url)
+    addToast({ variant: 'success', title: 'Exported', description: 'Markdown downloaded' })
+  }
 
   const handleUpload = async () => {
     if (!file) return
@@ -137,9 +168,60 @@ export default function UploadPage() {
     return <Badge className={`${light} ${dark} border capitalize`}>{severity}</Badge>
   }
 
+  const riskStroke = (score: number) => {
+    if (score >= 70) return '#ef4444' // red-500
+    if (score >= 40) return '#f59e0b' // amber-500
+    return '#10b981' // emerald-500
+  }
+
+  const RiskGauge = ({ score }: { score: number }) => {
+    const radius = 28
+    const circumference = 2 * Math.PI * radius
+    const progress = Math.min(Math.max(score, 0), 100) / 100
+    const dash = circumference * progress
+    return (
+      <div className="flex items-center gap-3">
+        <svg width="72" height="72" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r={radius} stroke="#e5e7eb" strokeWidth="8" fill="none" />
+          <circle
+            cx="36"
+            cy="36"
+            r={radius}
+            stroke={riskStroke(score)}
+            strokeWidth="8"
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${dash} ${circumference - dash}`}
+            transform="rotate(-90 36 36)"
+          />
+          <text x="36" y="40" textAnchor="middle" fontSize="14" className="fill-slate-700 dark:fill-slate-200">{score}</text>
+        </svg>
+        <div className="text-sm">
+          <div className="font-semibold">Risk Score</div>
+          <div className="text-slate-600 dark:text-slate-300">0 (safe) – 100 (high)</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-10">
-      <Card>
+      {/* Hero Header */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
+        className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-orange-50 via-white to-indigo-50 p-6 dark:border-slate-800 dark:from-orange-950/20 dark:via-slate-900 dark:to-indigo-950/20">
+        <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-orange-200/40 blur-2xl dark:bg-orange-500/10" />
+        <div className="pointer-events-none absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-indigo-200/40 blur-2xl dark:bg-indigo-500/10" />
+        <div className="relative">
+          <div className="flex items-center gap-2 text-sm font-medium text-brand-accent">
+            <Sparkles className="h-4 w-4" /> AI Contract Analysis
+          </div>
+          <h1 className="mt-2 text-2xl font-bold leading-tight md:text-3xl">Upload a contract. Get instant insights.</h1>
+          <p className="mt-2 max-w-2xl text-sm text-brand-text-secondary">Drag and drop a PDF/DOCX or select a file. We’ll summarize key clauses, surface risks with a score, and generate a negotiation email in your tone.</p>
+        </div>
+      </motion.div>
+
+      {/* Upload Card */}
+      <Card className="card-padded-lg">
         <CardHeader className="pb-2">
           <CardTitle>Upload Contract</CardTitle>
         </CardHeader>
@@ -149,15 +231,18 @@ export default function UploadPage() {
               const f = files[0]
               if (f) setFile(f)
             }} />
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Input id="file-input" type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              <Button onClick={handleUpload} disabled={!file || uploading}>
+              <Button className="btn-primary" onClick={handleUpload} disabled={!file || uploading}>
                 {uploading ? (<><Spinner className="mr-2" /> Uploading...</>) : 'Analyze'}
               </Button>
             </div>
             {error && (
               <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{error}</div>
             )}
+            <div className="flex flex-wrap items-center gap-2 text-xs text-brand-text-secondary">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Supports PDF/DOC/DOCX up to 10MB • Encrypted in transit • No data resale
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -172,7 +257,20 @@ export default function UploadPage() {
             <TabsTrigger value="qa">Ask Questions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="summary">
+          {/* Quick Actions */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => copyToClipboard(buildMarkdown())}>
+              <FileText className="mr-2 h-4 w-4" /> Copy Full Report
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportMarkdown}>
+              <Download className="mr-2 h-4 w-4" /> Export Markdown
+            </Button>
+            <Button size="sm" onClick={handleReset}>
+              <RefreshCw className="mr-2 h-4 w-4" /> New Analysis
+            </Button>
+          </div>
+
+          <TabsContent value="summary" className="tab-pane">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle>Summary</CardTitle>
@@ -188,7 +286,7 @@ export default function UploadPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="clauses">
+          <TabsContent value="clauses" className="tab-pane">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle>Key Clauses</CardTitle>
@@ -212,10 +310,13 @@ export default function UploadPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="risks">
+          <TabsContent value="risks" className="tab-pane">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle>Risks</CardTitle>
+                <div className="flex items-center gap-4">
+                  <CardTitle>Risks</CardTitle>
+                  <RiskGauge score={analysis.risk_score} />
+                </div>
                 <Button variant="outline" size="sm" onClick={() => copyToClipboard(JSON.stringify(analysis.risks, null, 2))}>
                   <Copy className="mr-2 h-4 w-4" /> Copy
                 </Button>
@@ -244,7 +345,7 @@ export default function UploadPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="email">
+          <TabsContent value="email" className="tab-pane">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle>Email Draft</CardTitle>
@@ -284,7 +385,7 @@ export default function UploadPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="qa">
+          <TabsContent value="qa" className="tab-pane">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle>Ask Questions</CardTitle>

@@ -1,3 +1,90 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Site-wide tokens and helpers */
+@layer base {
+  :root {
+    --section-y: 4rem;
+  }
+  html, body {
+    @apply antialiased;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-[color:var(--bg,theme(colors.brand.surface.base))] text-[color:var(--fg,theme(colors.brand.text.primary))];
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+@layer utilities {
+  .container-page {
+    @apply mx-auto max-w-[1200px] px-4;
+  }
+  .section {
+    @apply py-16 md:py-24;
+  }
+  .section-tight {
+    @apply py-12 md:py-16;
+  }
+  .eyebrow {
+    @apply text-[12px] uppercase tracking-widest text-slate-500;
+  }
+  .nav-link {
+    @apply rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100;
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+  }
+  .card-padded {
+    @apply card p-6;
+  }
+  .card-padded-lg {
+    @apply card p-8 md:p-10;
+  }
+  .bg-site-gradient {
+    @apply bg-gradient-to-br from-white to-slate-50;
+  }
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-md;
+  }
+
+  /* Tabs content micro-interactions */
+  .tab-pane {
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+  .tab-pane[data-state="inactive"] {
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+  }
+  .tab-pane[data-state="active"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Typography helpers */
+  .h1 {
+    @apply text-[3.5rem] leading-tight font-bold tracking-tight;
+  }
+  .h2 {
+    @apply text-[2.5rem] leading-tight font-bold tracking-tight;
+  }
+  .body-muted {
+    @apply text-brand-text-secondary;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold transition-colors shadow-sm;
+  }
+  .btn-primary {
+    @apply btn bg-brand-primary text-white hover:opacity-95;
+  }
+  .btn-secondary {
+    @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50;
+  }
+}

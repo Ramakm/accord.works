@@ -12,7 +12,7 @@ from docx import Document
 from dotenv import load_dotenv
 import json
 import re
-from contract_ai import analyze_contract_with_ai, generate_negotiation_email, answer_contract_question
+from backend.contract_ai import analyze_contract_with_ai, generate_negotiation_email, answer_contract_question
 
 load_dotenv()
 
