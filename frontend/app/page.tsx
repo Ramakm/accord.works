@@ -3,6 +3,7 @@
 import { Mail, ShieldCheck, Sparkles, UploadCloud, CheckCircle2, AlertTriangle, CreditCard, ArrowRight, Lock, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import SecurityInfo from '../components/security-info'
 
 export default function Home() {
   const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null)
@@ -292,6 +293,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Security & Privacy */}
+      <SecurityInfo />
 
       {/* Final CTA */}
       <section id="cta" className="section-tight">
