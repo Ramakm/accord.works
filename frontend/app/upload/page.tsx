@@ -97,6 +97,10 @@ export default function UploadPage() {
       if (fileInput) fileInput.value = ''
       setFile(null)
       addToast({ variant: 'success', title: 'Upload complete', description: data.filename })
+      // Notify listeners (e.g., dashboard) that an analysis has completed
+      try {
+        window.dispatchEvent(new CustomEvent('contractai:analysis-complete'))
+      } catch {}
     } catch (error: any) {
       const msg = error.response?.data?.detail || 'Error uploading contract. Please try again.'
       setError(msg)

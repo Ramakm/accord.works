@@ -43,8 +43,8 @@ export default function Home() {
               ContractAI uses AI to summarize, extract clauses, highlight risks, and even draft responses – saving you time and money.
             </motion.p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <a href="/upload" className="btn-primary transition-transform transform-gpu hover:scale-[1.03] active:scale-95">
-                <UploadCloud className="mr-2 h-4 w-4" /> Try Free – 1 Free Analysis
+              <a href="/signin" className="btn-primary transition-transform transform-gpu hover:scale-[1.03] active:scale-95">
+                <UploadCloud className="mr-2 h-4 w-4" /> Try Free – 10 Free Analyses
               </a>
               <a href="#how" className="btn-secondary transition-transform transform-gpu hover:scale-[1.03] active:scale-95">
                 <Sparkles className="mr-2 h-4 w-4" /> See How it Works
@@ -131,7 +131,7 @@ export default function Home() {
           ))}
         </div>
         <div className="mt-8 text-center">
-          <a href="/upload" className="btn-primary">Try Free Now</a>
+          <a href="/signin" className="btn-primary">Try Free Now</a>
         </div>
       </section>
 
@@ -140,7 +140,7 @@ export default function Home() {
         <div className="text-center">
           <div className="eyebrow">Process</div>
           <h2 className="mt-2 h2">How It Works</h2>
-          <div className="mt-2 text-sm text-brand-text-secondary">Bonus: 1 free credit included on signup</div>
+          <div className="mt-2 text-sm text-brand-text-secondary">Bonus: 10 free credits included on signup</div>
         </div>
         <div className="mt-10 grid gap-8 md:grid-cols-4">
           {[
@@ -175,7 +175,7 @@ export default function Home() {
         </div>
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
           {[
-            { name: 'Free', credits: '1 credit', price: '$0' },
+            { name: 'Free', credits: '10 credits', price: '$0' },
             { name: 'Pro', credits: '10 credits', price: '$15' },
           ].map((p, i) => (
             <motion.div
@@ -196,38 +196,12 @@ export default function Home() {
                 <li>Export to Markdown</li>
                 <li>Email draft assistant</li>
               </ul>
-              <button
-                className="mt-6 btn-primary w-full justify-center transition-transform transform-gpu hover:scale-[1.02] active:scale-95"
-                onClick={async () => {
-                  try {
-                    if (p.name === 'Pro') {
-                      const base = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
-                      const params = new URLSearchParams()
-                      // Optionally pass known user fields if you have them
-                      // params.set('email', user?.email ?? '')
-                      const res = await fetch(`${base}/payments/pro/link?${params.toString()}`)
-                      if (!res.ok) throw new Error('Failed to get payment link')
-                      const data = await res.json()
-                      const link = data?.paymentLink as string | undefined
-                      if (!link) throw new Error('No link returned')
-                      window.location.href = link
-                      return
-                    }
-                    // Free uses static env link
-                    const url = process.env.NEXT_PUBLIC_DODO_CHECKOUT_FREE
-                    if (url) {
-                      window.location.href = url
-                    } else {
-                      alert('Checkout link not configured. Please set NEXT_PUBLIC_DODO_CHECKOUT_FREE and NEXT_PUBLIC_BACKEND_URL in your env.')
-                    }
-                  } catch (e) {
-                    console.error(e)
-                    alert('Unable to start checkout. Please try again later.')
-                  }
-                }}
+              <a
+                href="/signin"
+                className="mt-6 btn-primary w-full justify-center transition-transform transform-gpu hover:scale-[1.02] active:scale-95 text-center"
               >
-                <CreditCard className="mr-2 h-4 w-4" /> Buy Now
-              </button>
+                <CreditCard className="mr-2 h-4 w-4" /> {p.name === 'Pro' ? 'Buy now' : 'Sign up now'}
+              </a>
             </motion.div>
           ))}
         </div>
@@ -303,10 +277,10 @@ export default function Home() {
           <div>
             <div className="eyebrow">Start now</div>
             <h3 className="mt-2 text-2xl font-bold">Start Analyzing Contracts Smarter Today</h3>
-            <p className="mt-1 text-sm text-brand-text-secondary">Get 1 free credit on signup. Upgrade anytime.</p>
+            <p className="mt-1 text-sm text-brand-text-secondary">Get 10 free credits on signup. Upgrade anytime.</p>
           </div>
           <div className="flex gap-3">
-            <a href="/upload" className="btn-primary">
+            <a href="/signin" className="btn-primary">
               <UploadCloud className="mr-2 h-4 w-4" /> Sign Up Free
             </a>
             <a href="#pricing" className="btn-secondary">
