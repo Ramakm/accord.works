@@ -1,4 +1,5 @@
 "use client"
+export const dynamic = 'force-dynamic'
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -7,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { setPlan, getPlan, getCredits, consumeCredit, setCredits, type Plan } from "@/lib/credits"
-import UploadPage from "../upload/page"
+import NextDynamic from "next/dynamic"
+const Upload = NextDynamic(() => import("../upload/page"), { ssr: false })
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -148,7 +150,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <UploadPage />
+        <Upload />
       )}
     </div>
   )
