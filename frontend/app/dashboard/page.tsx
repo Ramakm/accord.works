@@ -104,7 +104,8 @@ export default function DashboardPage() {
       const params = new URLSearchParams()
       if (email) params.set('email', email)
       params.set('redirect_url', redirectUrl)
-      const res = await fetch(`/api/payments/pro/link?${params.toString()}`)
+      const API = process.env.NEXT_PUBLIC_BACKEND_URL as string
+      const res = await fetch(`${API}/payments/pro/link?${params.toString()}`)
       if (!res.ok) throw new Error('Failed to get payment link')
       const data = await res.json()
       const link = data.paymentLink
