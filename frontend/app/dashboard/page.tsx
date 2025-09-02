@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { getSupabase } from "@/lib/supabaseClient"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +24,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.auth.getUser()
+      const { data } = await getSupabase().auth.getUser()
       const u = data.user
       if (!u) {
         router.replace("/signin")
@@ -116,7 +116,7 @@ export default function DashboardPage() {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await getSupabase().auth.signOut()
     router.replace("/signin")
   }
 

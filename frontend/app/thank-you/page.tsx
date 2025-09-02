@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { getSupabase } from "@/lib/supabaseClient"
 import { upgradeToPro } from "@/lib/credits"
 
 export default function ThankYouPage() {
@@ -11,7 +11,7 @@ export default function ThankYouPage() {
 
   useEffect(() => {
     const markPro = async () => {
-      const { data } = await supabase.auth.getUser()
+      const { data } = await getSupabase().auth.getUser()
       const user = data.user
       if (user) {
         upgradeToPro(user.id)

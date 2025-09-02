@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
+import { getSupabase } from "@/lib/supabaseClient"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ export default function SignInPage() {
   useEffect(() => {
     // If already signed in, go to dashboard
     const check = async () => {
-      const { data } = await supabase.auth.getUser()
+      const { data } = await getSupabase().auth.getUser()
       if (data.user) router.replace("/dashboard")
     }
     check()
@@ -31,10 +31,10 @@ export default function SignInPage() {
     setLoading(true)
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({ email, password })
+        const { error } = await getSupabase().auth.signUp({ email, password })
         if (error) throw error
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await getSupabase().auth.signInWithPassword({ email, password })
         if (error) throw error
       }
       addToast({ variant: "success", title: mode === "signup" ? "Account created" : "Signed in" })
