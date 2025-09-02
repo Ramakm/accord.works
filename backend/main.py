@@ -52,20 +52,25 @@ class EmailRequest(BaseModel):
     tone: str = "professional"
     issues: Optional[List[str]] = None
 
-# Configure CORS
+# Configure CORS (supports exact origin via FRONTEND_URL or regex via FRONTEND_ORIGIN_REGEX)
+_frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000").strip()
+_frontend_origin_regex = os.getenv("FRONTEND_ORIGIN_REGEX")  # e.g. r"https://cme-ai-frontend(-[a-z0-9-]+)?\\.vercel\\.app$"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:3000")],
+    allow_origins=[] if _frontend_origin_regex else [_frontend_url],
+    allow_origin_regex=_frontend_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Create storage directories
-UPLOAD_DIR = Path("uploads")
-DATA_DIR = Path("data")
-UPLOAD_DIR.mkdir(exist_ok=True)
-DATA_DIR.mkdir(exist_ok=True)
+# Create storage directories (serverless-friendly). Vercel only allows writes to /tmp
+BASE_DATA_DIR = Path(os.getenv("APP_DATA_DIR", "/tmp")).resolve()
+UPLOAD_DIR = BASE_DATA_DIR / "uploads"
+DATA_DIR = BASE_DATA_DIR / "data"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Simple persistent stores
 _CREDITS_FILE = DATA_DIR / "credits.json"
