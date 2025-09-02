@@ -1,4 +1,5 @@
 export type Plan = 'free' | 'pro'
+export const PRO_CREDITS = 1000
 
 const k = (userId: string, name: string) => `contractai:${name}:${userId}`
 
@@ -25,8 +26,21 @@ export function setCredits(userId: string, credits: number) {
 }
 
 export function consumeCredit(userId: string) {
-  const plan = getPlan(userId)
-  if (plan === 'pro') return // unlimited
   const left = getCredits(userId)
   if (left > 0) setCredits(userId, left - 1)
+}
+
+// Upgrade helper: set plan to pro and top up to PRO_CREDITS if below that
+export function upgradeToPro(userId: string) {
+  setPlan(userId, 'pro')
+  const current = getCredits(userId)
+  if (current < PRO_CREDITS) setCredits(userId, PRO_CREDITS)
+}
+
+// Helper to signal a prompt was used; dashboards can listen and consume a credit
+export function dispatchPromptUsed() {
+  if (typeof window === 'undefined') return
+  try {
+    window.dispatchEvent(new CustomEvent('contractai:prompt-used'))
+  } catch {}
 }

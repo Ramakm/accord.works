@@ -176,7 +176,7 @@ export default function Home() {
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
           {[
             { name: 'Free', credits: '10 credits', price: '$0' },
-            { name: 'Pro', credits: '10 credits', price: '$15' },
+            { name: 'Pro', credits: '1000 credits', price: '$15' },
           ].map((p, i) => (
             <motion.div
               key={p.name}

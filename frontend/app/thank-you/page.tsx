@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import { setPlan } from "@/lib/credits"
+import { upgradeToPro } from "@/lib/credits"
 
 export default function ThankYouPage() {
   const router = useRouter()
@@ -14,7 +14,8 @@ export default function ThankYouPage() {
       const { data } = await supabase.auth.getUser()
       const user = data.user
       if (user) {
-        setPlan(user.id, 'pro')
+        upgradeToPro(user.id)
+        try { localStorage.setItem('contractai:upgrade-success', '1') } catch {}
       }
       setTimeout(() => router.replace('/dashboard'), 800)
     }
