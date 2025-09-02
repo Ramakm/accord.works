@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { setPlan, getPlan, getCredits, consumeCredit, setCredits, type Plan, PRO_CREDITS } from "@/lib/credits"
-import NextDynamic from "next/dynamic"
-const Upload = NextDynamic(() => import("../upload/page"), { ssr: false })
+import Upload from "../upload/page"
 import { useToast } from "@/components/ui/toast-provider"
 
 export default function DashboardPage() {
