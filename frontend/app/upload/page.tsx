@@ -83,8 +83,7 @@ export default function UploadPage() {
     formData.append('file', file)
 
     try {
-      const API = process.env.NEXT_PUBLIC_BACKEND_URL as string
-      const response = await axios.post(`${API}/upload`, formData, {
+      const response = await axios.post(`/api/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -116,8 +115,7 @@ export default function UploadPage() {
     setLoadingQA(true)
     setError(null)
     try {
-      const API = process.env.NEXT_PUBLIC_BACKEND_URL as string
-      const response = await axios.post(`${API}/ask-question`, {
+      const response = await axios.post(`/api/ask-question`, {
         question,
         contract_text: extractedText
       })
@@ -140,8 +138,7 @@ export default function UploadPage() {
     setLoadingEmail(true)
     setError(null)
     try {
-      const API = process.env.NEXT_PUBLIC_BACKEND_URL as string
-      const response = await axios.post(`${API}/generate-email`, {
+      const response = await axios.post(`/api/generate-email`, {
         contract_text: extractedText,
         tone: emailTone
       })
