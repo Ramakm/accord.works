@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'ContractAI — Understand Contracts in Seconds',
   description: 'ContractAI uses AI to summarize, extract clauses, highlight risks, and draft responses — saving you time and money.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
@@ -18,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-site-gradient text-slate-900 dark:bg-slate-950 dark:text-slate-100`}>
+      <body className={`${inter.className} min-h-screen bg-site-gradient text-slate-900`}>
         <Providers>
           <AppShell>
             {children}

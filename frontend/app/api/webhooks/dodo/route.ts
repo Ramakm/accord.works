@@ -43,10 +43,11 @@ export async function POST(req: Request) {
 
   const creditsForPlan = (name: string) => {
     const n = (name || "").toLowerCase();
-    if (n.includes("pro")) return 10;
+    if (n.includes("pro")) return 500;
     if (n.includes("free")) return 1;
     const amount = data.amount || data.price?.amount;
-    if (["1500", "15", "15.00"].includes(String(amount))) return 10;
+    // Support historical $15 as well as new one-time $9.99
+    if (["1500", "15", "15.00", "999", "9.99", "9"].includes(String(amount))) return 500;
     return 0;
   };
 
