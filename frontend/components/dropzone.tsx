@@ -9,7 +9,15 @@ export function FileDropzone({ onFiles, className }: { onFiles: (files: File[]) 
     if (acceptedFiles?.length) onFiles(acceptedFiles)
   }, [onFiles])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: false, accept: { "application/pdf": [".pdf"], "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"], "text/plain": [".txt"] } })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      "application/pdf": [".pdf"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "text/plain": [".txt"],
+    },
+  })
 
   return (
     <div

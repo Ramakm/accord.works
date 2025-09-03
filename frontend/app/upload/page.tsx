@@ -235,8 +235,13 @@ export default function UploadPage() {
               const f = files[0]
               if (f) setFile(f)
             }} />
+            {file && (
+              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                Selected: <span className="font-medium">{file.name}</span> <span className="text-xs text-slate-500">({(file.size / 1024).toFixed(1)} KB)</span>
+              </div>
+            )}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Input id="file-input" type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              <Input id="file-input" type="file" accept=".pdf,.docx,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} />
               <Button className="btn-primary" onClick={handleUpload} disabled={!file || uploading}>
                 {uploading ? (<><Spinner className="mr-2" /> Uploading...</>) : 'Analyze'}
               </Button>
@@ -245,7 +250,7 @@ export default function UploadPage() {
               <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{error}</div>
             )}
             <div className="flex flex-wrap items-center gap-2 text-xs text-brand-text-secondary">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Supports PDF/DOC/DOCX up to 10MB • Encrypted in transit • No data resale
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Supports PDF/DOCX/TXT up to 10MB • Encrypted in transit • No data resale
             </div>
           </div>
         </CardContent>
