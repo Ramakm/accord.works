@@ -54,7 +54,8 @@ export default function SignInPage() {
       const { error } = await getSupabase().auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: origin ? `${origin}/dashboard` : undefined,
+          // Route to a dedicated callback page that can parse the URL hash and then redirect
+          redirectTo: origin ? `${origin}/auth/callback` : undefined,
         },
       })
       if (error) throw error
