@@ -58,11 +58,9 @@ export default function DashboardPage() {
   }, [router, addToast])
 
   useEffect(() => {
-    const handler = () => {
+    const onAnalysisComplete = () => {
       if (!userId) return
-      consumeCredit(userId)
-      setCreditsState(getCredits(userId))
-      // Add a lightweight recent analysis record
+      // Don't deduct here. Only update recent list; credits are deducted at user actions.
       try {
         const entry = { id: `${Date.now()}`, at: Date.now() }
         const key = `contractai:recent:${userId}`
@@ -73,8 +71,16 @@ export default function DashboardPage() {
         setRecent(next)
       } catch {}
     }
-    window.addEventListener('contractai:analysis-complete', handler)
-    return () => window.removeEventListener('contractai:analysis-complete', handler)
+    const onCreditsUpdated = () => {
+      if (!userId) return
+      setCreditsState(getCredits(userId))
+    }
+    window.addEventListener('contractai:analysis-complete', onAnalysisComplete)
+    window.addEventListener('contractai:credits-updated', onCreditsUpdated)
+    return () => {
+      window.removeEventListener('contractai:analysis-complete', onAnalysisComplete)
+      window.removeEventListener('contractai:credits-updated', onCreditsUpdated)
+    }
   }, [userId])
 
   // Consume credit for prompts as well

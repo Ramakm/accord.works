@@ -96,6 +96,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Security & Privacy (3rd section) */}
+      <SecurityInfo />
+
       {/* Value / Features */}
       <section id="features" className="section">
         <div className="text-center">
@@ -191,6 +194,9 @@ export default function Home() {
               <div className="text-base font-semibold">{p.name}</div>
               <div className="mt-1 text-sm text-brand-text-secondary">{p.credits}</div>
               <div className="mt-4 text-2xl font-bold">{p.price}</div>
+              {p.name === 'Pro' && (
+                <div className="mt-1 text-xs text-brand-text-secondary">One-time payment</div>
+              )}
               <ul className="mt-3 list-inside list-disc text-xs text-brand-text-secondary">
                 <li>AI summary, clauses, risks</li>
                 <li>Export to Markdown</li>
@@ -268,8 +274,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Security & Privacy */}
-      <SecurityInfo />
+      
 
       {/* Final CTA */}
       <section id="cta" className="section-tight">

@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react"
 import { usePathname } from "next/navigation"
+import { Twitter, Mail } from "lucide-react"
 // Dark mode removed
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -62,10 +63,26 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <div>
                 <div className="text-sm font-semibold">Get in touch</div>
-                <ul className="mt-3 space-y-2 text-sm text-slate-600">
-                  <li><a className="hover:text-slate-900" href="mailto:hello@clausewise.ai">hello@clausewise.ai</a></li>
-                  <li><a className="hover:text-slate-900" href="/signin">Try Free</a></li>
-                </ul>
+                <div className="mt-3 flex items-center gap-4 text-slate-600">
+                  <a
+                    className="inline-flex items-center justify-center rounded hover:text-slate-900"
+                    href="mailto:itsramakrushna@gmail.com"
+                    aria-label="Email"
+                    title="Email"
+                  >
+                    <Mail className="h-5 w-5" />
+                  </a>
+                  <a
+                    href="https://x.com/techwith_ram"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="X (Twitter)"
+                    title="X (Twitter)"
+                    className="inline-flex items-center justify-center rounded text-slate-600 hover:text-slate-900"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>

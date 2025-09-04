@@ -30,6 +30,13 @@ export function consumeCredit(userId: string) {
   if (left > 0) setCredits(userId, left - 1)
 }
 
+export function consumeCreditsBy(userId: string, amount: number) {
+  if (amount <= 0) return
+  const left = getCredits(userId)
+  const next = Math.max(0, left - amount)
+  setCredits(userId, next)
+}
+
 // Upgrade helper: set plan to pro and top up to PRO_CREDITS if below that
 export function upgradeToPro(userId: string) {
   setPlan(userId, 'pro')
@@ -42,5 +49,12 @@ export function dispatchPromptUsed() {
   if (typeof window === 'undefined') return
   try {
     window.dispatchEvent(new CustomEvent('contractai:prompt-used'))
+  } catch {}
+}
+
+export function dispatchCreditsUpdated() {
+  if (typeof window === 'undefined') return
+  try {
+    window.dispatchEvent(new CustomEvent('contractai:credits-updated'))
   } catch {}
 }

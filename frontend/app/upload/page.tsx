@@ -13,6 +13,8 @@ import { FileDropzone } from '@/components/dropzone'
 import { CheckCircle2, Copy, AlertTriangle, Send, Sparkles, Download, RefreshCw, FileText } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useToast } from '@/components/ui/toast-provider'
+import { getSupabase } from '@/lib/supabaseClient'
+import { consumeCreditsBy, dispatchCreditsUpdated } from '@/lib/credits'
 
 interface ContractAnalysis {
   summary: string
@@ -83,6 +85,16 @@ export default function UploadPage() {
     formData.append('file', file)
 
     try {
+      // Deduct credits for Analyze action (-4)
+      try {
+        const { data } = await getSupabase().auth.getUser()
+        const user = data.user
+        if (user) {
+          consumeCreditsBy(user.id, 4)
+          dispatchCreditsUpdated()
+        }
+      } catch {}
+
       const response = await axios.post(`/api/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -138,6 +150,16 @@ export default function UploadPage() {
     setLoadingEmail(true)
     setError(null)
     try {
+      // Deduct credits for Generate Mail (-2)
+      try {
+        const { data } = await getSupabase().auth.getUser()
+        const user = data.user
+        if (user) {
+          consumeCreditsBy(user.id, 2)
+          dispatchCreditsUpdated()
+        }
+      } catch {}
+
       const response = await axios.post(`/api/generate-email`, {
         contract_text: extractedText,
         tone: emailTone
@@ -231,9 +253,20 @@ export default function UploadPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <FileDropzone onFiles={(files) => {
+            <FileDropzone onFiles={async (files) => {
               const f = files[0]
-              if (f) setFile(f)
+              if (f) {
+                setFile(f)
+                // Deduct 4 credits for any upload selection (PDF/DOCX/TXT)
+                try {
+                  const { data } = await getSupabase().auth.getUser()
+                  const user = data.user
+                  if (user) {
+                    consumeCreditsBy(user.id, 4)
+                    dispatchCreditsUpdated()
+                  }
+                } catch {}
+              }
             }} />
             {file && (
               <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
@@ -241,7 +274,21 @@ export default function UploadPage() {
               </div>
             )}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Input id="file-input" type="file" accept=".pdf,.docx,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              <Input id="file-input" type="file" accept=".pdf,.docx,.txt" onChange={async (e) => {
+                const selected = e.target.files?.[0] || null
+                setFile(selected)
+                if (selected) {
+                  // Deduct 4 credits for any upload selection (PDF/DOCX/TXT)
+                  try {
+                    const { data } = await getSupabase().auth.getUser()
+                    const user = data.user
+                    if (user) {
+                      consumeCreditsBy(user.id, 4)
+                      dispatchCreditsUpdated()
+                    }
+                  } catch {}
+                }
+              }} />
               <Button className="btn-primary" onClick={handleUpload} disabled={!file || uploading}>
                 {uploading ? (<><Spinner className="mr-2" /> Uploading...</>) : 'Analyze'}
               </Button>
