@@ -10,7 +10,7 @@ export default function SecurityInfo() {
         <div className="eyebrow">Security & Privacy</div>
         <h2 className="mt-2 h2">Your data stays private and secure</h2>
         <p className="mt-2 text-sm text-brand-text-secondary">
-          We designed ContractAI with privacy-first principles. Clear policies. No surprises.
+          We designed AccordWorks with privacy-first principles. Clear policies. No surprises.
         </p>
       </div>
 

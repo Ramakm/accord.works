@@ -58,7 +58,7 @@ export default function UploadPage() {
     if (!analysis) return ''
     const clauses = analysis.key_clauses.map(c => `- [${c.importance.toUpperCase()}] ${c.type}: ${c.content}`).join('\n')
     const risks = analysis.risks.map(r => `- (${r.severity.toUpperCase()}) ${r.risk_type}: ${r.description}${r.clause_reference ? ` [Clause: ${r.clause_reference}]` : ''}`).join('\n')
-    return `# ContractAI Analysis\n\n## TL;DR Summary\n${analysis.summary}\n\n## Key Clauses\n${clauses}\n\n## Risks (Score: ${analysis.risk_score})\n${risks}\n\n---\nGenerated with ContractAI.`
+    return `# AccordWorks Analysis\n\n## TL;DR Summary\n${analysis.summary}\n\n## Key Clauses\n${clauses}\n\n## Risks (Score: ${analysis.risk_score})\n${risks}\n\n---\nGenerated with AccordWorks.`
   }
 
   const handleExportMarkdown = () => {
@@ -68,7 +68,7 @@ export default function UploadPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'contractai-analysis.md'
+    a.download = 'accordworks-analysis.md'
     a.click()
     URL.revokeObjectURL(url)
     addToast({ variant: 'success', title: 'Exported', description: 'Markdown downloaded' })

@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4">
           <a href="/" className="flex items-center gap-3">
             <div className="h-8 w-8 rounded bg-brand-primary" />
-            <span className="text-[15px] font-semibold tracking-tight">ContractAI</span>
+            <span className="text-[15px] font-semibold tracking-tight">AccordWorks</span>
           </a>
           <div className="hidden items-center gap-1 md:flex">
             <a href="/#features" className="nav-link">Features</a>
@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div>
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded bg-brand-primary" />
-                <span className="text-base font-semibold">ContractAI</span>
+                <span className="text-base font-semibold">AccordWorks</span>
               </div>
               <p className="mt-3 max-w-md text-sm text-slate-600">Understand contracts in seconds, not hours. AI summaries, clause extraction, risk detection, and drafting.</p>
             </div>
@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
           </div>
-          <div className="mt-10 text-center text-xs text-slate-500">© 2025 ContractAI. All rights reserved.</div>
+          <div className="mt-10 text-center text-xs text-slate-500">© 2025 AccordWorks. All rights reserved.</div>
         </div>
       </footer>
     </div>

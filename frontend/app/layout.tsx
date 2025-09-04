@@ -7,8 +7,8 @@ import { AppShell } from '@/components/app-shell'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ContractAI — Understand Contracts in Seconds',
-  description: 'ContractAI uses AI to summarize, extract clauses, highlight risks, and draft responses — saving you time and money.',
+  title: 'AccordWorks — Understand Contracts in Seconds',
+  description: 'AccordWorks uses AI to summarize, extract clauses, highlight risks, and draft responses — saving you time and money.',
   icons: {
     icon: '/favicon.svg',
   },
