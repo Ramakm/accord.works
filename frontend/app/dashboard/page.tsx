@@ -1,15 +1,16 @@
 "use client"
 export const dynamic = 'force-dynamic'
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getSupabase } from "@/lib/supabaseClient"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { setPlan, getPlan, getCredits, consumeCredit, setCredits, type Plan, PRO_CREDITS } from "@/lib/credits"
+import { getPlan, getCredits, consumeCredit, type Plan, PRO_CREDITS } from "@/lib/credits"
 import Upload from "../upload/page"
 import { useToast } from "@/components/ui/toast-provider"
+import { Menu, X } from "lucide-react"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [plan, setPlanState] = useState<Plan>('free')
   const [credits, setCreditsState] = useState<number>(0)
   const [recent, setRecent] = useState<Array<{ id: string; at: number }>>([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -97,6 +99,7 @@ export default function DashboardPage() {
     return () => window.removeEventListener('storage', onStorage)
   }, [userId])
 
+  // Upgrade flow kept but not emphasized in UI (available within sidebar)
   const upgrade = async () => {
     if (!userId) return
     try {
@@ -125,122 +128,94 @@ export default function DashboardPage() {
   const isPro = plan === 'pro'
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
-      {/* Sidebar */}
-      <aside className="hidden md:block">
-        <nav className="sticky top-4 space-y-2">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Overview</div>
-          <a className="block rounded px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">Dashboard</a>
-          <div className="text-xs uppercase tracking-wide text-slate-500 mt-4">Work</div>
-          <a className="block rounded px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#upload">Upload</a>
-          <a className="block rounded px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#recent">Recent</a>
-          <div className="text-xs uppercase tracking-wide text-slate-500 mt-4">Account</div>
-          <a className="block rounded px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#account">Settings</a>
-        </nav>
-      </aside>
+    <div className="relative">
+      {/* Sidebar overlay / drawer */}
+      <div className={`fixed inset-0 z-40 ${sidebarOpen ? 'block' : 'hidden'}`}>
+        <div className="absolute inset-0 bg-black/20" onClick={() => setSidebarOpen(false)} />
+        <aside className="absolute left-0 top-0 h-full w-72 max-w-[80%] bg-white shadow-xl ring-1 ring-slate-200">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+            <div className="font-semibold">Menu</div>
+            <button onClick={() => setSidebarOpen(false)} aria-label="Close sidebar" className="p-2 rounded hover:bg-slate-100">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <nav className="p-3 space-y-1 text-sm">
+            <a className="block rounded px-3 py-2 bg-slate-100 font-medium" href="#">Dashboard</a>
+            <a className="block rounded px-3 py-2 hover:bg-slate-50" href="#account">Profile & Account</a>
+            <button className="block w-full text-left rounded px-3 py-2 hover:bg-slate-50" onClick={upgrade}>Billing / Upgrade Plan</button>
+            <a className="block rounded px-3 py-2 hover:bg-slate-50" href="/support">Support / Help</a>
+            <button className="block w-full text-left rounded px-3 py-2 hover:bg-slate-50" onClick={signOut}>Logout</button>
+          </nav>
+          <div className="mt-auto p-3 text-xs text-slate-500">
+            <div>Plan: <span className="font-medium">{isPro ? 'Pro' : 'Free'}</span></div>
+            <div>Credits: <span className="font-medium">{credits}</span></div>
+          </div>
+        </aside>
+      </div>
 
-      {/* Main content */}
-      <section className="space-y-6">
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
+      {/* Top bar */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button className="p-2 rounded-md border border-slate-200 hover:bg-white/60" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+            <Menu className="h-5 w-5" />
+          </button>
           <div>
             <h1 className="text-2xl font-bold">Dashboard</h1>
-            <div className="text-sm text-slate-600 dark:text-slate-300">Welcome back{email ? `, ${email}` : ''}</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge>{isPro ? 'Pro' : 'Free'}</Badge>
-            <Button variant="outline" onClick={signOut}>Sign out</Button>
+            <div className="text-sm text-slate-600">Welcome back{email ? `, ${email}` : ''}</div>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          <Badge>{isPro ? 'Pro' : 'Free'}</Badge>
+          <Button variant="outline" onClick={signOut}>Sign out</Button>
+        </div>
+      </div>
 
-        {/* Stat cards */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
+      {/* Main focus: Upload */}
+      <section id="upload" className="space-y-4">
+        {credits <= 0 ? (
+          <Card className="card-padded-lg">
             <CardHeader className="pb-2">
-              <CardTitle>Profile</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <div><span className="font-semibold">Name:</span> {name || '—'}</div>
-              <div><span className="font-semibold">Email:</span> {email}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Plan</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <div className="text-slate-600 dark:text-slate-300">Credits remaining: {credits}</div>
-              {isPro && (
-                <div className="text-xs text-slate-500">Pro includes {PRO_CREDITS} credits.</div>
-              )}
-              {!isPro && (
-                <Button className="btn-primary mt-2" onClick={upgrade}>Upgrade to Pro</Button>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Actions</CardTitle>
+              <CardTitle>Out of credits</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm">
-                <div>Use the uploader below to analyze your contract.</div>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="text-sm text-slate-600">You&apos;re out of credits. Upgrade to Pro to get {PRO_CREDITS} credits.</div>
+                <Button className="btn-primary" onClick={upgrade}>Upgrade to Pro</Button>
               </div>
             </CardContent>
           </Card>
-        </div>
+        ) : (
+          <Upload />
+        )}
+      </section>
 
-        {/* Upload Section */}
-        <div id="upload">
-          {credits <= 0 ? (
-            <Card className="card-padded-lg">
-              <CardHeader className="pb-2">
-                <CardTitle>Out of credits</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-sm text-slate-600 dark:text-slate-300">You&apos;re out of credits. Upgrade to Pro to get {PRO_CREDITS} credits.</div>
-                  <Button className="btn-primary" onClick={upgrade}>Upgrade to Pro</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Upload />
-          )}
-        </div>
-
-        {/* Recent Analyses */}
-        <div id="recent">
+      {/* Optional: Recent uploads */}
+      {recent.length > 0 && (
+        <section id="recent" className="mt-6">
           <Card>
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle>Recent Analyses</CardTitle>
-              {recent.length > 0 && (
-                <Button variant="ghost" onClick={() => {
-                  if (!userId) return
-                  localStorage.removeItem(`contractai:recent:${userId}`)
-                  setRecent([])
-                }}>Clear</Button>
-              )}
+              <Button variant="ghost" onClick={() => {
+                if (!userId) return
+                localStorage.removeItem(`contractai:recent:${userId}`)
+                setRecent([])
+              }}>Clear</Button>
             </CardHeader>
             <CardContent>
-              {recent.length === 0 ? (
-                <div className="text-sm text-slate-600 dark:text-slate-300">No analyses yet. Upload a contract to get started.</div>
-              ) : (
-                <ul className="divide-y divide-slate-200 dark:divide-slate-800">
-                  {recent.map((r) => (
-                    <li key={r.id} className="py-2 text-sm flex items-center justify-between">
-                      <span>Analysis on {new Date(r.at).toLocaleString()}</span>
-                      <span className="text-xs text-slate-500">#{r.id.slice(-6)}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <ul className="divide-y divide-slate-200">
+                {recent.map((r) => (
+                  <li key={r.id} className="py-2 text-sm flex items-center justify-between">
+                    <span>Analysis on {new Date(r.at).toLocaleString()}</span>
+                    <span className="text-xs text-slate-500">#{r.id.slice(-6)}</span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* FAQ is rendered by the Upload component below the upload card. */}
     </div>
   )
 }
